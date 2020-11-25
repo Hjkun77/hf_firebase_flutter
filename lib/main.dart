@@ -1,15 +1,11 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hf_firebase_flutter/second_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
@@ -37,7 +33,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var storage = FirebaseStorage.instance;
   List<AssetImage> listOfImage;
   bool clicked = false;
   List<String> listOfStr = List();
@@ -133,41 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     setState(() {
                       this.isLoading = true;
                     });
-                    listOfStr.forEach((img) async {
-                      String imageName = img
-                          .substring(img.lastIndexOf("/"), img.lastIndexOf("."))
-                          .replaceAll("/", "");
-
-                      final Directory systemTempDir = Directory.systemTemp;
-                      final byteData = await rootBundle.load(img);
-
-                      final file =
-                          File('${systemTempDir.path}/$imageName.jpeg');
-                      await file.writeAsBytes(byteData.buffer.asUint8List(
-                          byteData.offsetInBytes, byteData.lengthInBytes));
-                      StorageTaskSnapshot snapshot = await storage
-                          .ref()
-                          .child("images/$imageName")
-                          .putFile(file)
-                          .onComplete;
-                      if (snapshot.error == null) {
-                        final String downloadUrl =
-                            await snapshot.ref.getDownloadURL();
-                        await FirebaseFirestore.instance
-                            .collection("images")
-                            .add({"url": downloadUrl, "name": imageName});
-                        setState(() {
-                          isLoading = false;
-                        });
-                        final snackBar =
-                            SnackBar(content: Text('Yay! Success'));
-                        Scaffold.of(context).showSnackBar(snackBar);
-                      } else {
-                        print(
-                            'Error from image repo ${snapshot.error.toString()}');
-                        throw ('This file is not an image');
-                      }
-                    });
+                    print("Imaged Saved");
+                    // Include Firebase functions here
                   });
             }),
             RaisedButton(
